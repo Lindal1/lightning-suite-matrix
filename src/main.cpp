@@ -5,18 +5,36 @@
  */
 #include "Arduino.h"
 
+//Пин подключен к ST_CP входу 74HC595
+int latchPin = 8;
+//Пин подключен к SH_CP входу 74HC595
+int clockPin = 12;
+//Пин подключен к DS входу 74HC595
+int dataPin = 11;
+
+
+
 void setup() {
-  // initialize LED digital pin as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+ //устанавливаем режим OUTPUT
+ pinMode(latchPin, OUTPUT);
+ pinMode(clockPin, OUTPUT);
+ pinMode(dataPin, OUTPUT);
 }
 
 void loop() {
-  // turn the LED on (HIGH is the voltage level)
-  digitalWrite(LED_BUILTIN, HIGH);
-  // wait for a second
-  delay(1000);
-  // turn the LED off by making the voltage LOW
-  digitalWrite(LED_BUILTIN, LOW);
-  // wait for a second
-  delay(1000);
+ // отсчитываем от 0 до 255  и отображаем значение на светодиоде
+ int row = 1;
+ for (int i = 1; i < 9; i++) {
+   // устанавливаем синхронизацию "защелки" на LOW
+   digitalWrite(latchPin, LOW);
+
+   shiftOut(dataPin, clockPin, MSBFIRST, row);
+   shiftOut(dataPin, clockPin, MSBFIRST, 0);
+
+   shiftOut(dataPin, clockPin, MSBFIRST, 255);
+   shiftOut(dataPin, clockPin, MSBFIRST, 255);
+   //"защелкиваем" регистр, тем самым устанавливая значения на выходах
+   digitalWrite(latchPin, HIGH);
+   row = row << i;
+ }
 }
